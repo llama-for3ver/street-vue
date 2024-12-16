@@ -12,11 +12,12 @@ import StreetView from './components/StreetView.vue'
 .street-view-panorama {
   overflow-y: hidden;
   overscroll-behavior: none;
-  margin: 0px;
+  padding: 2px;
 }
 
 #sv {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 96vh;
+  align-self: center;
 }
 </style>

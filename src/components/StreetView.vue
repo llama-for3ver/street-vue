@@ -210,12 +210,13 @@ const updateSize = () => {
     const width = panoramaContainer.value.clientWidth;
     const height = panoramaContainer.value.clientHeight;
     
-    // Update camera
+    if (renderer.domElement.width === width && renderer.domElement.height === height) {
+        return;
+    }
+    
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    
-    // Update renderer
-    renderer.setSize(width, height, false); // false to prevent setting canvas style
+    renderer.setSize(width, height, false);
 };
 
 const init = async () => {
@@ -324,16 +325,16 @@ onMounted(async () => {
     animate();
 });
 </script>
-
 <style scoped>
 .street-view-panorama {
-    position: relative;
-    overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  margin: 0px;
 }
 
 #svcanvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
+  width: 100%;
+  height: 100%;
 }
 </style>
