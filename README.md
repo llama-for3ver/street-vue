@@ -1,5 +1,32 @@
-# Vue 3 + TypeScript + Vite
+# Street-Vue
+Google Street View made from stratch in Vue.js. No API key required.
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+> [!CAUTION]
+> This library is not production ready (yet). It currenly cannot be moved around in, doesn't defer tile loading, isn't responsive and doesn't handle all edge cases. This is also the first time I have made a Vue.js library, so any help is appreciated.
+
+## Usage
+Basic usage:
+
+```vue
+<script>
+import StreetView from 'street-vue'
+</script>
+<template>
+    <StreetView panoId="WlMXvion3Q6Rba7QdmHi5A" :zoom="4" />
+</template>
+```
+Tip: you can find the pano ID in google maps by running the following in street view:
+`"".concat(window.location.href.split("!1s")[1].split("!2e")[0]).replace('%2F','/')`
+
+The zoom ranges from 1-5. This can be changed trading loading speed for resolution.
+
+The library also includes a simple demo.
+## Known Issues 
+Not exaustive. 
+1. [ ] Allow for moving around. 
+2. [ ] Defer tile loading based on zoom.
+3. [ ] Generally make more responsive. 
+4. [ ] Keyboard controls.
+4. [ ] Improve demo.
+
