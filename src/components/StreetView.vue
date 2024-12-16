@@ -1,11 +1,11 @@
 <template>
     <div class="street-view-panorama" ref="panoramaContainer">
-        <canvas ref="svcanvas" id="svcanvas" />
+        <canvas class="touch-none w-full" ref="svcanvas" id="svcanvas" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, onBeforeUnmount } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import * as THREE from 'three';
 
 const baseUrl = "https://streetviewpixels-pa.googleapis.com/v1/tile";
@@ -16,7 +16,7 @@ const svcanvas = ref<HTMLCanvasElement | null>(null);
 
 let panoId = props.panoId;
 
-console.log(panoId)
+// console.log(panoId)
 // panoId = "QO1VfbL8kpdJr5p5szXjww";
 // QO1VfbL8kpdJr5p5szXjww
 // FeUaBDXEVnjfwlKKAJzaDg
@@ -42,7 +42,6 @@ const tiles = (zoom: number): number[] => {
 
 const loadPanorama = async () => {
     const start = Date.now();
-    // some panos don't have such a zoom
     const zoom = props.zoom;
     const [width, height] = tiles(zoom);
     const tileSize = 512;
@@ -55,7 +54,7 @@ const loadPanorama = async () => {
 
     const loadTile = (x: number, y: number) => {
         return new Promise((resolve, reject) => {
-            // FIXME: error handling - if something is wrong it will just give a black canvas
+            // FIXME: error handling
 
             const tileUrl = `${baseUrl}?cb_client=maps_sv.tactile&panoid=${panoId}&x=${x}&y=${y}&zoom=${zoom}`;
             const img = new Image();
@@ -202,40 +201,13 @@ const fixDimensions = (imageData: ImageData) => {
     };
 };
 
-let resizeObserver: ResizeObserver;
-
-const updateSize = () => {
-    if (!panoramaContainer.value || !camera || !renderer) return;
-    
-    const width = panoramaContainer.value.clientWidth;
-    const height = panoramaContainer.value.clientHeight;
-    
-    if (renderer.domElement.width === width && renderer.domElement.height === height) {
-        return;
-    }
-    
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height, false);
-};
-
 const init = async () => {
     scene = new THREE.Scene();
-    
-    const container = panoramaContainer.value;
-    if (!container) return;
-    
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    
-    camera = new THREE.PerspectiveCamera(75, width / height);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
 
-    renderer = new THREE.WebGLRenderer({ 
-        canvas: svcanvas.value as HTMLCanvasElement,
-        antialias: true
-    });
+    renderer = new THREE.WebGLRenderer({ canvas: svcanvas.value as HTMLCanvasElement });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(width, height, false);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
     await loadPanorama();
 
@@ -245,23 +217,7 @@ const init = async () => {
     panoramaContainer?.value?.addEventListener('wheel', onWheel);
     panoramaContainer?.value?.addEventListener('mouseleave', onPointerLeave);
 
-    resizeObserver = new ResizeObserver(() => {
-        updateSize();
-    });
-    
-    resizeObserver.observe(container);
 };
-
-onBeforeUnmount(() => {
-    if (resizeObserver) {
-        resizeObserver.disconnect();
-    }
-        panoramaContainer?.value?.removeEventListener('mousedown', onPointerDown);
-    panoramaContainer?.value?.removeEventListener('mousemove', onPointerMove);
-    panoramaContainer?.value?.removeEventListener('mouseup', onPointerUp);
-    panoramaContainer?.value?.removeEventListener('wheel', onWheel);
-    panoramaContainer?.value?.removeEventListener('mouseleave', onPointerLeave);
-});
 
 const animate = () => {
     requestAnimationFrame(animate);
@@ -325,16 +281,15 @@ onMounted(async () => {
     animate();
 });
 </script>
+
 <style scoped>
 .street-view-panorama {
-  overflow-y: hidden;
-  overflow-x: hidden;
-  overscroll-behavior: none;
-  margin: 0px;
+    height: 75%;
+    overflow: hidden;
 }
 
 #svcanvas {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 </style>
