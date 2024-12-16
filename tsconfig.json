@@ -1,7 +1,4 @@
 {
-  "include": [
-    "src/**/*.vue"
-  ],
   "files": [],
   "references": [
     {

@@ -269,7 +269,6 @@ const onPointerLeave = () => {
 };
 
 watch(() => panoId, () => {
-    // @ts-expect-error
     if (sphere) {
         scene.remove(sphere);
         loadPanorama();
