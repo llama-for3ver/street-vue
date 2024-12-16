@@ -16,7 +16,7 @@ import StreetView from 'street-vue'
     <StreetView panoId="WlMXvion3Q6Rba7QdmHi5A" :zoom="4" />
 </template>
 ```
-Tip: you can find the pano ID in google maps by running the following in street view:
+Tip: you can find the pano ID in Google Maps by running the following in Street View:
 `"".concat(window.location.href.split("!1s")[1].split("!2e")[0]).replace('%2F','/')`
 
 The zoom ranges from 1-5. This can be changed trading loading speed for resolution.
