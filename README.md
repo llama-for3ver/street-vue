@@ -28,7 +28,7 @@ Not exaustive.
 2. [ ] Defer tile loading based on zoom.
 3. [ ] Generally make more responsive. 
 4. [ ] Keyboard controls.
-5. [ ] Improve demos
+5. [ ] Improve demos.
 6. [ ] Fix some zooms not working with specific spheres.
 7. [ ] Doesn't work at max quality on FireFox.
 8. [ ] Odd tilting.
