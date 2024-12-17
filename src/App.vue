@@ -17,7 +17,7 @@ import StreetView from './components/StreetView.vue'
 
 #sv {
   width: 100vw;
-  height: 96vh;
+  height: 100vh;
   align-self: center;
 }
 </style>
