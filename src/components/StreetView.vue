@@ -36,6 +36,8 @@ let onPointerDownLat = 0;
 let phi = 0;
 let theta = 0;
 
+let baseSensitivity = 0.15;
+
 const tiles = (zoom: number): number[] => {
     return [2 ** zoom, 2 ** (zoom - 1)];
 };
@@ -249,8 +251,9 @@ const onPointerDown = (event: MouseEvent) => {
 
 const onPointerMove = (event: MouseEvent) => {
     if (isUserInteracting) {
-        lon = (onPointerDownMouseX - event.clientX) * 0.1 + onPointerDownLon;
-        lat = (event.clientY - onPointerDownMouseY) * 0.1 + onPointerDownLat;
+        const sensitivity = baseSensitivity * Math.tan(camera.fov * Math.PI / 180 / 2);
+        lon = (onPointerDownMouseX - event.clientX) * sensitivity + onPointerDownLon;
+        lat = (event.clientY - onPointerDownMouseY) * sensitivity + onPointerDownLat;
     }
 };
 
