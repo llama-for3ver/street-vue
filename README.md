@@ -31,4 +31,5 @@ Not exaustive.
 5. [ ] Improve demos
 6. [ ] Fix some zooms not working with specific spheres.
 7. [ ] Doesn't work at max quality on FireFox.
-8. [ ] Odd tilting
+8. [ ] Odd tilting.
+9. [ ] (Lack of) Strong typing.
