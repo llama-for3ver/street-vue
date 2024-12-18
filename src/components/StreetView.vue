@@ -209,6 +209,7 @@ const updateSize = () => {
 const init = async () => {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+    camera.position.set(0, 0, 0);
 
     renderer = new THREE.WebGLRenderer({
         canvas: svcanvas.value as HTMLCanvasElement,
