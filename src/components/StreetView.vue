@@ -9,7 +9,10 @@ import { onMounted, ref, watch } from 'vue';
 import * as THREE from 'three';
 
 const baseUrl = "https://streetviewpixels-pa.googleapis.com/v1/tile";
-const props = defineProps(['panoId', 'zoom']);
+const props = defineProps<{
+  panoId: string;
+  zoom: number;
+}>();
 
 const panoramaContainer = ref<HTMLDivElement | null>(null);
 const svcanvas = ref<HTMLCanvasElement | null>(null);
