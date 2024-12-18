@@ -1,33 +1,26 @@
 <template>
     <div class="street-view-panorama" ref="panoramaContainer">
-        <canvas class="touch-none w-full" ref="svcanvas" id="svcanvas" />
+        <canvas class="touch-none w-full h-full" ref="svcanvas" id="svcanvas"></canvas>
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import * as THREE from 'three';
 
 const baseUrl = "https://streetviewpixels-pa.googleapis.com/v1/tile";
 const props = defineProps<{
-  panoId: string;
-  zoom: number;
+    panoId: string;
+    zoom: number;
 }>();
 
 const panoramaContainer = ref<HTMLDivElement | null>(null);
 const svcanvas = ref<HTMLCanvasElement | null>(null);
 
 let panoId = props.panoId;
-
-// console.log(panoId)
-// panoId = "QO1VfbL8kpdJr5p5szXjww";
-// QO1VfbL8kpdJr5p5szXjww
-// FeUaBDXEVnjfwlKKAJzaDg
-
 let scene: THREE.Scene;
 let camera: THREE.PerspectiveCamera;
 let renderer: THREE.WebGLRenderer;
-let sphere: THREE.Mesh;
 
 let isUserInteracting = false;
 let onPointerDownMouseX = 0;
@@ -59,8 +52,6 @@ const loadPanorama = async () => {
 
     const loadTile = (x: number, y: number) => {
         return new Promise((resolve, reject) => {
-            // FIXME: error handling
-
             const tileUrl = `${baseUrl}?cb_client=maps_sv.tactile&panoid=${panoId}&x=${x}&y=${y}&zoom=${zoom}`;
             const img = new Image();
             img.crossOrigin = 'anonymous';
@@ -156,7 +147,6 @@ const loadPanorama = async () => {
     }
 };
 
-
 const fixDimensions = (imageData: ImageData) => {
     const { data, width, height } = imageData;
     let rightmostNonBlackPixel = 0;
@@ -206,22 +196,36 @@ const fixDimensions = (imageData: ImageData) => {
     };
 };
 
+const updateSize = () => {
+    if (panoramaContainer.value) {
+        const width = panoramaContainer.value.clientWidth;
+        const height = panoramaContainer.value.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+    }
+};
+
 const init = async () => {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
 
-    renderer = new THREE.WebGLRenderer({ canvas: svcanvas.value as HTMLCanvasElement });
+    renderer = new THREE.WebGLRenderer({
+        canvas: svcanvas.value as HTMLCanvasElement,
+        antialias: true
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
 
     await loadPanorama();
 
-    panoramaContainer?.value?.addEventListener('mousedown', onPointerDown);
-    panoramaContainer?.value?.addEventListener('mousemove', onPointerMove);
-    panoramaContainer?.value?.addEventListener('mouseup', onPointerUp);
-    panoramaContainer?.value?.addEventListener('wheel', onWheel);
-    panoramaContainer?.value?.addEventListener('mouseleave', onPointerLeave);
-
+    panoramaContainer.value?.addEventListener('mousedown', onPointerDown);
+    panoramaContainer.value?.addEventListener('mousemove', onPointerMove);
+    panoramaContainer.value?.addEventListener('mouseup', onPointerUp);
+    panoramaContainer.value?.addEventListener('wheel', onWheel);
+    panoramaContainer.value?.addEventListener('mouseleave', onPointerLeave);
 };
 
 const animate = () => {
@@ -230,7 +234,6 @@ const animate = () => {
 };
 
 const update = () => {
-
     lat = Math.max(-85, Math.min(85, lat));
     phi = THREE.MathUtils.degToRad(90 - lat);
     theta = THREE.MathUtils.degToRad(lon);
@@ -240,7 +243,6 @@ const update = () => {
     const z = 500 * Math.sin(phi) * Math.sin(theta);
 
     camera.lookAt(x, y, z);
-
     renderer.render(scene, camera);
 };
 
@@ -274,23 +276,66 @@ const onPointerLeave = () => {
     isUserInteracting = false;
 };
 
-watch(() => panoId, () => {
-    // @ts-ignore
-    if (sphere) {
-        scene.remove(sphere);
-        loadPanorama();
-    }
-});
+watch(
+    () => [props.panoId, props.zoom],
+    async ([newPanoId]) => {
+        if (!scene) return;
+
+        // clear existing panorama
+        // it feels better when it doesn't go black...
+        // scene.traverse((object) => {
+        //     if (object instanceof THREE.Mesh) {
+        //         object.geometry.dispose();
+        //         if (object.material instanceof THREE.Material) {
+        //             if (object.material.map) {
+        //                 object.material.map.dispose();
+        //             }
+        //             object.material.dispose();
+        //         }
+        //         scene.remove(object);
+        //     }
+        // });
+
+        panoId = newPanoId as string;
+        await loadPanorama();
+    },
+    { immediate: true }
+);
 
 onMounted(async () => {
     await init();
     animate();
 });
+
+onUnmounted(() => {
+    if (panoramaContainer.value) {
+        panoramaContainer.value.removeEventListener('mousedown', onPointerDown);
+        panoramaContainer.value.removeEventListener('mousemove', onPointerMove);
+        panoramaContainer.value.removeEventListener('mouseup', onPointerUp);
+        panoramaContainer.value.removeEventListener('wheel', onWheel);
+        panoramaContainer.value.removeEventListener('mouseleave', onPointerLeave);
+    }
+
+    window.removeEventListener('resize', updateSize);
+
+    if (scene) {
+        scene.traverse((object) => {
+            if (object instanceof THREE.Mesh) {
+                object.geometry.dispose();
+                if (object.material instanceof THREE.Material) {
+                    object.material.dispose();
+                }
+            }
+        });
+    }
+
+    renderer?.dispose();
+    renderer?.forceContextLoss();
+});
 </script>
 
 <style scoped>
 .street-view-panorama {
-    height: 75%;
     overflow: hidden;
 }
 
