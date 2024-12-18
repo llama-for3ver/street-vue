@@ -19,11 +19,12 @@ const changePano = () => {
 
 <template>
   <div class="street-view-panorama">
-    <button style="position:absolute; top: 20px; left: 2%;" @click="changeZoom">Change Zoom</button>
-    <button style="position:absolute; top: 20px; left: 10%;" @click="changePano">Change Pano</button>
+    <button @click="changeZoom">Change Zoom</button>
+    <button @click="changePano">Change Pano</button>
     <StreetView id="sv" :panoId="pano" :zoom="zoom" />
   </div>
 </template>
+
 
 <style>
 .street-view-panorama {
